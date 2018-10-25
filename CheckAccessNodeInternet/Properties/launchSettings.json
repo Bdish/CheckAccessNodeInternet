@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CheckAccessNodeInternet": {
+      "commandName": "Project",
+      "commandLineArgs": "-in NodeInternet.txt -out Save.csv"
+    }
+  }
+}
