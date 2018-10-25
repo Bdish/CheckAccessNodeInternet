@@ -40,10 +40,12 @@ namespace CheckAccessNodeInternet
 
             commandLineApplication.OnExecute(() =>
             {
+                //для статистики сбор результатов
                 int success = 0;
                 int notSuccess = 0;
                 int statusNotSet = 0;
 
+                //указан входной файл с узлами
                 if (inFile.HasValue())
                 {
                     string allIp="";
@@ -64,14 +66,14 @@ namespace CheckAccessNodeInternet
                         return 0;
                     }
 
-                    allIp = allIp.Replace("\r", "");
+                    allIp = allIp.Replace("\r", "");//перенос каретки также есть в файле
 
-                    string[] arrayIp = allIp.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+                    string[] arrayIp = allIp.Split("\n", StringSplitOptions.RemoveEmptyEntries);//разделяем входную строку с узлами интернет на массив адресов
 
 
 
-                    List<PingReply> PingAsync = new List<PingReply>();
-                    Task<PingReply[]> pingResults=null;
+                    List<PingReply> PingAsync = new List<PingReply>();//массив инициализаций пинга
+                    Task<PingReply[]> pingResults=null;//массив результатов пинга
 
                     try
                     {
@@ -129,10 +131,12 @@ namespace CheckAccessNodeInternet
                     return 0;
                 }
 
+                //указан выходной файл с результатами
                 if (outFile.HasValue())
                 {
                     try
                     {
+                        //формат CVS
                         string result = $"{success};\n{notSuccess};\n{statusNotSet};";
 
                         if (File.Exists(outFile.Value()))
