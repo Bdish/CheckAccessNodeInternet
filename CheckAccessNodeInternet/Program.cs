@@ -18,8 +18,8 @@ namespace CheckAccessNodeInternet
         static void Main(string[] args)
         {
             CancellationTokenSource cancelTokenSource = new CancellationTokenSource(GlobalSetting.LiveTimeProgram);
-           // System.Diagnostics.Stopwatch sw = new Stopwatch();
-           //   sw.Start();
+            System.Diagnostics.Stopwatch sw = new Stopwatch();
+             sw.Start();
 
             CommandLineApplication commandLineApplication =new CommandLineApplication(throwOnUnexpectedArg: false);
 
