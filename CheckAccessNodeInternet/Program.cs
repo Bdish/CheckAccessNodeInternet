@@ -17,12 +17,6 @@ namespace CheckAccessNodeInternet
 
         static void Main(string[] args)
         {
-            CancellationTokenSource cancelTokenSource = new CancellationTokenSource(60000);
-            CancellationToken token = cancelTokenSource.Token;
-          //  System.Diagnostics.Stopwatch sw = new Stopwatch();
-          //  sw.Start();
-
-
             CommandLineApplication commandLineApplication =new CommandLineApplication(throwOnUnexpectedArg: false);
 
             var inFile = commandLineApplication.Option(
@@ -70,33 +64,25 @@ namespace CheckAccessNodeInternet
 
                     string[] arrayIp = allIp.Split("\n", StringSplitOptions.RemoveEmptyEntries);//разделяем входную строку с узлами интернет на массив адресов
 
-                   /* List<string> arrayIp=new List<string>(50000);
-
-                    for(int i = 0; i < 50000; i++)
-                    {
-                        arrayIp.Add(arrayIp1[i]);
-                    }*/
-
-
+                   
                     List<PingReply> PingAsync = new List<PingReply>();//массив инициализаций пинга
                     Task<PingReply[]> pingResults=null;//массив результатов пинга
 
                     try
                     {
-                        var pingTasks = arrayIp.Select(host => new Ping().SendPingAsync(host, 3000)).ToList();
+                        var pingTasks = arrayIp.Select(host => new Ping().SendPingAsync(host, 10000)).ToList();
 
 
                         // pingResults = Task.WhenAll(pingTasks);
                         Task.WhenAny(pingResults = Task.WhenAll(pingTasks), Task.Delay(60000));
-                       // Task.WhenAny(pingResults = Task.WhenAll(pingTasks), cancelTokenSource);
+                      
 
                     }
                     catch (Exception)
                     {
                         Console.WriteLine("Error in the request or the response from the server.");
                     }
-
-                   // var pingResults =Task.WhenAll(pingTasks); 
+ 
 
                     if(pingResults == null)
                     {
@@ -166,8 +152,7 @@ namespace CheckAccessNodeInternet
 
             commandLineApplication.Execute(args);
 
-           // sw.Stop();
-          //  Console.WriteLine((sw.ElapsedMilliseconds / 1000.0).ToString());
+          
         }
       
     }
