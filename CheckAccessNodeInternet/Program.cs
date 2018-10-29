@@ -17,9 +17,9 @@ namespace CheckAccessNodeInternet
 
         static void Main(string[] args)
         {
-           
-
-           // System.Diagnostics.Stopwatch sw = new Stopwatch();
+            CancellationTokenSource cancelTokenSource = new CancellationTokenSource(60000);
+            CancellationToken token = cancelTokenSource.Token;
+          //  System.Diagnostics.Stopwatch sw = new Stopwatch();
           //  sw.Start();
 
 
@@ -70,6 +70,12 @@ namespace CheckAccessNodeInternet
 
                     string[] arrayIp = allIp.Split("\n", StringSplitOptions.RemoveEmptyEntries);//разделяем входную строку с узлами интернет на массив адресов
 
+                   /* List<string> arrayIp=new List<string>(50000);
+
+                    for(int i = 0; i < 50000; i++)
+                    {
+                        arrayIp.Add(arrayIp1[i]);
+                    }*/
 
 
                     List<PingReply> PingAsync = new List<PingReply>();//массив инициализаций пинга
@@ -77,9 +83,12 @@ namespace CheckAccessNodeInternet
 
                     try
                     {
-                        
-                        var pingTasks = arrayIp.Select(host => new Ping().SendPingAsync(host, 5000)).ToList();
+                        var pingTasks = arrayIp.Select(host => new Ping().SendPingAsync(host, 3000)).ToList();
+
+
+                        // pingResults = Task.WhenAll(pingTasks);
                         Task.WhenAny(pingResults = Task.WhenAll(pingTasks), Task.Delay(60000));
+                       // Task.WhenAny(pingResults = Task.WhenAll(pingTasks), cancelTokenSource);
 
                     }
                     catch (Exception)
@@ -157,8 +166,8 @@ namespace CheckAccessNodeInternet
 
             commandLineApplication.Execute(args);
 
-          //  sw.Stop();
-         //   Console.WriteLine((sw.ElapsedMilliseconds / 1000.0).ToString());
+           // sw.Stop();
+          //  Console.WriteLine((sw.ElapsedMilliseconds / 1000.0).ToString());
         }
       
     }
