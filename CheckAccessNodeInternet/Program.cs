@@ -70,11 +70,11 @@ namespace CheckAccessNodeInternet
 
                     try
                     {
-                        var pingTasks = arrayIp.Select(host => new Ping().SendPingAsync(host, 10000)).ToList();
+                        var pingTasks = arrayIp.Select(host => new Ping().SendPingAsync(host, GlobalSetting.TimeOutPing)).ToList();
 
 
                         // pingResults = Task.WhenAll(pingTasks);
-                        Task.WhenAny(pingResults = Task.WhenAll(pingTasks), Task.Delay(60000));
+                        Task.WhenAny(pingResults = Task.WhenAll(pingTasks), Task.Delay(GlobalSetting.LiveTimeProgram));
                       
 
                     }
@@ -156,5 +156,12 @@ namespace CheckAccessNodeInternet
         }
       
     }
-    
+
+    public static class GlobalSetting
+    {
+        public static int TimeOutPing { get; set; } = 3000;
+
+        public static int LiveTimeProgram { get; set; } = 60000;
+    }
+
 }
