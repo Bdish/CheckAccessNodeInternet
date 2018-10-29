@@ -17,6 +17,10 @@ namespace CheckAccessNodeInternet
 
         static void Main(string[] args)
         {
+            CancellationTokenSource cancelTokenSource = new CancellationTokenSource(GlobalSetting.LiveTimeProgram);
+           // System.Diagnostics.Stopwatch sw = new Stopwatch();
+           //   sw.Start();
+
             CommandLineApplication commandLineApplication =new CommandLineApplication(throwOnUnexpectedArg: false);
 
             var inFile = commandLineApplication.Option(
@@ -64,18 +68,30 @@ namespace CheckAccessNodeInternet
 
                     string[] arrayIp = allIp.Split("\n", StringSplitOptions.RemoveEmptyEntries);//разделяем входную строку с узлами интернет на массив адресов
 
-                   
+                    //string[] arrayIp = arrayIp1.Take(50000).ToArray();
                     List<PingReply> PingAsync = new List<PingReply>();//массив инициализаций пинга
-                    Task<PingReply[]> pingResults=null;//массив результатов пинга
+                    List<Task<PingReply>> pingTasks = null;//массив результатов пинга
 
                     try
                     {
-                        var pingTasks = arrayIp.Select(host => new Ping().SendPingAsync(host, GlobalSetting.TimeOutPing)).ToList();
+                     pingTasks = arrayIp.Select(async host => 
+                                                            {
+                                                                try
+                                                                {
+                                                                    
+                                                                    return await new Ping().SendPingAsync(host, GlobalSetting.TimeOutPing);
+                                                                }
+                                                                catch (Exception)
+                                                                {
+                                                                  
+                                                                    return null;
+                                                                }
+                                                            }
+                                                                ).ToList();
 
 
-                        // pingResults = Task.WhenAll(pingTasks);
-                        Task.WhenAny(pingResults = Task.WhenAll(pingTasks), Task.Delay(GlobalSetting.LiveTimeProgram));
-                      
+                        
+                        Task.WaitAll(pingTasks.ToArray(), cancelTokenSource.Token);
 
                     }
                     catch (Exception)
@@ -84,27 +100,35 @@ namespace CheckAccessNodeInternet
                     }
  
 
-                    if(pingResults == null)
+                    if(pingTasks == null)
                     {
                         Console.WriteLine("Results lost.");
                     }
-                    PingAsync=pingResults.Result.ToList();
+                   
 
-                    foreach (var ping in PingAsync)
+                    foreach (var ping in pingTasks)
                     {
-                        if (ping != null)
-                        { 
-                            if (ping.Status == IPStatus.Success)
+                        if (ping.Status ==TaskStatus.RanToCompletion)
+                        {
+                            
+                            if (ping.Result != null)
                             {
+                                if (ping.Result.Status == IPStatus.Success)
+                                {
 
-                                success++;
+                                    success++;
 
+                                }
+                                else
+                                {
+
+                                    notSuccess++;
+
+                                }
                             }
                             else
                             {
-
-                                notSuccess++;
-
+                                statusNotSet++;
                             }
                         }
                         else
@@ -152,16 +176,18 @@ namespace CheckAccessNodeInternet
 
             commandLineApplication.Execute(args);
 
-          
+            // sw.Stop();
+            // Console.WriteLine((sw.ElapsedMilliseconds / 1000.0).ToString());
+
         }
-      
+
     }
 
     public static class GlobalSetting
     {
-        public static int TimeOutPing { get; set; } = 3000;
+        public static int TimeOutPing { get; set; } = 1000;//пинг 3 секунды
 
-        public static int LiveTimeProgram { get; set; } = 60000;
+        public static int LiveTimeProgram { get; set; } = 60000;//время жизни проги
     }
 
 }
